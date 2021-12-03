@@ -6,10 +6,11 @@ const PASSWORD = encodeURIComponent(config.dbPassword);
 const URI = config.dbUrl;
 const sequelize = new Sequelize(URI,{
     dialect: "postgres",
+    protocol: "postgres",
     logging: false,
-    ssl: true,
     dialectOptions: {
         ssl: {
+            require: true,
             rejectUnauthorized: false
         }
     }
