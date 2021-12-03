@@ -3,10 +3,16 @@ const  config  = require("../config/config");
 const setupModels = require("../DB/models");
 const USER = encodeURIComponent(config.dbUser);
 const PASSWORD = encodeURIComponent(config.dbPassword);
-const URI = `postgres://${USER}:${PASSWORD}@${config.dbHost}:${config.dbPort}/${config.dbName}`;
+const URI = config.dbUrl;
 const sequelize = new Sequelize(URI,{
     dialect: "postgres",
-    logging: true,
+    logging: false,
+    ssl: true,
+    dialectOptions: {
+        ssl: {
+            rejectUnauthorized: false
+        }
+    }
 });
 setupModels(sequelize);
 sequelize.sync();
