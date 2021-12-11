@@ -1,13 +1,13 @@
 const express = require("express");
 const router = express.Router();
-const ProductServices = require("../services/productsServices");
-const service = new ProductServices();
+const CompraProductoServices = require("../services/comprasProductoServices");
+const service = new CompraProductoServices();
 const {
 	createSchema,
 	updateSchema,
 	getSchema,
 	deleteSchema,
-} = require("../schemas/products.schema");
+} = require("../schemas/comprasProducto.Schema");
 const validatorHandler = require("../middlewares/validator");
 const verifyToken = require("../middlewares/verifyToken");
 
@@ -23,10 +23,10 @@ router.post(
 	"/",verifyToken,
 	validatorHandler(createSchema, "body"),
 	async (req, res, next) => {
-		const { name, description, image_url, price } = req.body;
+		const { compraId,productId,amount} = req.body;
 		try {
-			if (name) {
-				const task = await service.create(name, description, image_url, price);
+			if (compraId,productId) {
+				const task = await service.create(compraId,productId,amount);
 				res.status(200).json(task);
 			}
 		} catch (error) {
@@ -35,12 +35,12 @@ router.post(
 	}
 );
 
-router.get("/:id",verifyToken, validatorHandler(getSchema, "params"), async (req, res) => {
+router.get("/:id", verifyToken,validatorHandler(getSchema, "params"), async (req, res) => {
 	try {
 		const { id } = req.params;
-		const product = await service.findOne(id);
-		if (product) {
-			res.status(200).json(product);
+		const relation = await service.findOne(id);
+		if (relation) {
+			res.status(200).json(relation);
 		}
 		else{
 			res.status(404).json({
@@ -58,11 +58,11 @@ router.put(
 	validatorHandler(updateSchema, "body"),
 	async (req, res) => {
 		const { id } = req.params;
-		const { name,description,image_url,price } = req.body;
+		const { compraId,productId,amount} = req.body;
 
 		try {
-			const product = await service.update(id, name,description,image_url,price);
-			res.status(200).json(product);
+			const relation = await service.update(compraId,productId,amount);
+			res.status(200).json(relation);
 			
 		} catch (error) {
 			res.status(404).json({
@@ -80,7 +80,7 @@ router.delete(
 		try {
 			const response = await service.delete(id);
 			res.status(200).json({
-				mensaje: `se eliminó correctamente el producto con id: ${response}`,
+				mensaje: `se eliminó correctamente la compra con id: ${response}`,
 			});
 		} catch (error) {
 			res.status(404).json({

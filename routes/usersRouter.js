@@ -1,17 +1,17 @@
 const express = require("express");
 const router = express.Router();
-const ProductServices = require("../services/productsServices");
-const service = new ProductServices();
+const UserServices = require("../services/userServices");
+const service = new UserServices();
 const {
 	createSchema,
 	updateSchema,
 	getSchema,
 	deleteSchema,
-} = require("../schemas/products.schema");
+} = require("../schemas/users.schema");
 const validatorHandler = require("../middlewares/validator");
 const verifyToken = require("../middlewares/verifyToken");
 
-router.get("/",verifyToken, async (req, res) => {
+router.get("/",verifyToken,async (req, res) => {
 	try {
 		res.status(200).json(await service.find());
 	} catch (error) {
@@ -20,14 +20,14 @@ router.get("/",verifyToken, async (req, res) => {
 });
 
 router.post(
-	"/",verifyToken,
+	"/",
 	validatorHandler(createSchema, "body"),
 	async (req, res, next) => {
-		const { name, description, image_url, price } = req.body;
+		const { name, username, email,password, image_url } = req.body;
 		try {
 			if (name) {
-				const task = await service.create(name, description, image_url, price);
-				res.status(200).json(task);
+				const user = await service.create(name, username,email,password, image_url);
+				res.status(200).json(user);
 			}
 		} catch (error) {
 			res.status(404).json(error);
@@ -35,7 +35,7 @@ router.post(
 	}
 );
 
-router.get("/:id",verifyToken, validatorHandler(getSchema, "params"), async (req, res) => {
+router.get("/:id", verifyToken,validatorHandler(getSchema, "params"), async (req, res) => {
 	try {
 		const { id } = req.params;
 		const product = await service.findOne(id);
@@ -58,11 +58,11 @@ router.put(
 	validatorHandler(updateSchema, "body"),
 	async (req, res) => {
 		const { id } = req.params;
-		const { name,description,image_url,price } = req.body;
+		const { name,username,email,password,image_url} = req.body;
 
 		try {
-			const product = await service.update(id, name,description,image_url,price);
-			res.status(200).json(product);
+			const user = await service.update(id, name,username,email,password,image_url);
+			res.status(200).json(user);
 			
 		} catch (error) {
 			res.status(404).json({
@@ -80,7 +80,7 @@ router.delete(
 		try {
 			const response = await service.delete(id);
 			res.status(200).json({
-				mensaje: `se eliminó correctamente el producto con id: ${response}`,
+				mensaje: `se eliminó correctamente el usuario con id: ${response}`,
 			});
 		} catch (error) {
 			res.status(404).json({
@@ -90,5 +90,34 @@ router.delete(
 		}
 	}
 );
+router.post("/login",async (req,res)=>{
+	const {email,password} = req.body;
+	try{
+		const token = await service.login(email,password);
+		res.status(200).json({
+			mensaje: "sesion inciada",
+			token: token
+		});
+	}
+	catch(error){
+		res.status(404).json({
+			mensaje: "hubo un error",
+			error: error,
+		});
+	}
+});
+router.post("/logout",verifyToken,async(req,res)=>{
+	const token = req.headers["token"];
+	try{
+		const sesion = await service.logout(res,req);
+		res.status(200).json({sesion});
+	}
+	catch(error){
+		res.status(404).json({error});
+	}
+
+
+
+});
 
 module.exports = router;

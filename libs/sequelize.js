@@ -7,13 +7,13 @@ const URI = config.dbUrl;
 const sequelize = new Sequelize(URI,{
     dialect: "postgres",
     protocol: "postgres",
-    logging: false,
+    /*logging: false,
     dialectOptions: {
         ssl: {
             require: true,
             rejectUnauthorized: false
         }
-    }
+    }*/
 });
 setupModels(sequelize);
 sequelize.sync();
